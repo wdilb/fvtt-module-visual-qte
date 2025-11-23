@@ -10,15 +10,14 @@
 
 点击触发，所有玩家将同时开始QTE挑战
 
-宏命令调用
-javascript
+宏命令调用：
 // 获取API实例
 const qte = game.modules.get("visual-qte")?.api;
 
 // 触发QTE事件
 qte.trigger({
     count: 5,        // 5连击
-    duration: 2000,  // 速度 2000ms（越小越难）
+    duration: 2000,  // 速度 2000ms
     gmPlay: true     // GM也参与游戏
 });
 
