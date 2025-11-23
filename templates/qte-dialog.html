@@ -1,0 +1,43 @@
+<form class="qte-config-form flexcol" autocomplete="off">
+    <!-- 顶部说明 -->
+    <div class="qte-header-note">
+        <i class="fas fa-gamepad fa-2x"></i>
+        <span>配置 QTE 挑战的连击数与难度系数。</span>
+    </div>
+
+    <!-- 连击次数 -->
+    <div class="form-group">
+        <label><i class="fas fa-list-ol"></i> 连击次数 (Count)</label>
+        <div class="form-fields">
+            <input type="number" name="count" value="3" min="1" max="20" step="1" autofocus style="text-align: center;">
+        </div>
+    </div>
+
+    <!-- GM 是否参与 -->
+    <div class="form-group">
+        <label><i class="fas fa-user-secret"></i> GM 参与游戏</label>
+        <div class="form-fields">
+            <input type="checkbox" name="gmPlay" checked>
+        </div>
+    </div>
+
+    <!-- 难度/速度 -->
+    <div class="form-group">
+        <label><i class="fas fa-tachometer-alt"></i> 速度等级 (Speed)</label>
+        <div class="form-fields">
+            <select name="difficulty">
+                <option value="3000">简单 (3.0s)</option>
+                <option value="2500" selected>普通 (2.5s)</option>
+                <option value="1500">困难 (1.5s)</option>
+                <option value="1000">极难 (1.0s)</option>
+                <option value="600">地狱 (0.6s)</option>
+            </select>
+        </div>
+    </div>
+
+    <footer class="sheet-footer flexrow" style="margin-top: 15px;">
+        <button type="submit" name="submit">
+            <i class="fas fa-check"></i> 开始挑战
+        </button>
+    </footer>
+</form>

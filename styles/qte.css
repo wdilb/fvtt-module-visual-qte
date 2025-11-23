@@ -1,0 +1,167 @@
+/* 全屏遮罩：模糊背景，聚焦视线 */
+#qte-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0, 0, 0, 0.4); /* 稍微调低一点透明度，不让背景太黑 */
+    backdrop-filter: blur(2px);
+    z-index: 10000;
+    /* 去掉了 justify-content/align-items，因为内部容器现在自己定位 */
+    display: block; 
+    pointer-events: none;
+    font-family: 'Signika', sans-serif;
+    opacity: 0;
+    transition: opacity 0.2s ease-in-out;
+}
+
+#qte-overlay.active {
+    opacity: 1;
+}
+
+/* QTE 主容器 */
+.qte-container {
+    /* 尺寸保持不变 */
+    width: 300px;
+    height: 300px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    /* 位置由 JS 的 inline style 控制 (top, left, transform) */
+    pointer-events: auto; /* 理论上不需要点击，但为了保险 */
+}
+
+/* 目标光圈 (Target Ring) */
+.qte-target-ring {
+    position: absolute;
+    width: 150px;
+    height: 150px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    z-index: 1;
+}
+
+.qte-target-ring::after {
+    content: '';
+    position: absolute;
+    top: -4px; left: -4px; right: -4px; bottom: -4px;
+    border: 2px solid #00d2ff;
+    border-radius: 50%;
+    opacity: 0.6;
+}
+
+/* 缩小的光圈 */
+.qte-approach-ring {
+    position: absolute;
+    width: 300px;
+    height: 300px;
+    border: 6px solid #ff0055;
+    border-radius: 50%;
+    box-shadow: 0 0 20px #ff0055;
+    z-index: 2;
+}
+
+/* 按键提示 UI */
+.qte-key-prompt {
+    position: relative;
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(145deg, #1a1a1a, #2a2a2a);
+    border: 2px solid #fff;
+    border-radius: 12px;
+    color: #fff;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 48px;
+    font-weight: 900;
+    box-shadow: 0 0 30px rgba(0, 210, 255, 0.5);
+    z-index: 3;
+    text-transform: uppercase;
+}
+
+.qte-key-prompt.space {
+    width: 160px;
+    font-size: 24px;
+    border-radius: 8px;
+}
+
+/* 结果反馈文字 */
+.qte-result {
+    position: absolute;
+    top: 110%; /* 在圈的下面显示 */
+    width: 300px; /* 宽度设满防止换行问题 */
+    text-align: center;
+    font-size: 48px;
+    font-weight: bold;
+    text-shadow: 0 4px 10px rgba(0,0,0,0.8);
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    white-space: nowrap;
+}
+
+.qte-result.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.result-perfect { color: #fbbf24; text-shadow: 0 0 20px #fbbf24; }
+.result-good { color: #4ade80; text-shadow: 0 0 20px #4ade80; }
+.result-bad { color: #f87171; text-shadow: 0 0 20px #f87171; }
+
+@keyframes shrinkRing {
+    from { transform: scale(1); opacity: 1; }
+    to { transform: scale(0); opacity: 1; }
+}
+
+/* =========================================
+   新增：Dialog 美化样式
+   ========================================= */
+.qte-config-window .window-content {
+    background: url(../../../ui/parchment.jpg) repeat; /* 使用 FVTT 默认羊皮纸背景，或者换成深色 */
+    padding: 10px;
+    color: #191813;
+}
+
+/* 让表单更加紧凑 */
+.qte-config-form .form-group {
+    margin-bottom: 8px; /* 减少行间距 */
+    align-items: center;
+}
+
+.qte-config-form label {
+    font-weight: bold;
+    flex: 2;
+}
+
+.qte-config-form .form-fields {
+    flex: 1.5;
+}
+
+/* 顶部说明文字 */
+.qte-header-note {
+    background: rgba(0, 0, 0, 0.05);
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-radius: 4px;
+    padding: 8px;
+    margin-bottom: 12px !important; /* 强制覆盖默认边距 */
+    font-size: 13px;
+    color: #4b4a44;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* 底部按钮 */
+.qte-config-form button {
+    background: rgba(0, 0, 0, 0.8);
+    color: #fff;
+    border: 1px solid #000;
+}
+.qte-config-form button:hover {
+    background: #ff0055; /* 呼应 QTE 的红色 */
+    box-shadow: 0 0 10px #ff0055;
+}

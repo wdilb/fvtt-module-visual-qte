@@ -1,0 +1,31 @@
+{
+  "id": "visual-qte",
+  "title": "QTE",
+  "version": "1.1.0",
+  "compatibility": {
+    "minimum": "12",
+    "verified": "12"
+  },
+  "socket": true,
+  "authors": [
+    {
+      "name": "Tiwelee",
+      "qq": "273437679"
+    }
+  ],
+  "relationships": {
+    "requires": [
+      {
+        "id": "socketlib",
+        "type": "module"
+      }
+    ]
+  },
+  "esmodules": [
+    "scripts/main.js"
+  ],
+  "styles": [
+    "styles/qte.css"
+  ],
+  "description": "一个简单的QTEmod，GM发起让所有人可以进行QTE的游戏。"
+}
