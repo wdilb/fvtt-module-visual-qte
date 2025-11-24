@@ -352,3 +352,23 @@
     30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }
     40%, 60% { transform: translate3d(2px, 0, 0); }
 }
+
+/* 新增：连打倒计时样式 */
+.qte-timer {
+    font-size: 24px;
+    font-weight: bold;
+    color: #fff;
+    background: rgba(0, 0, 0, 0.5);
+    padding: 2px 12px;
+    border-radius: 12px;
+    border: 1px solid #555;
+    margin-top: 5px; /* 与上方提示文字拉开距离 */
+    font-family: monospace; /* 等宽字体防止数字跳动 */
+}
+
+/* 当时间少于3秒时变红警告 */
+.qte-timer.urgent {
+    color: #ff3333;
+    border-color: #ff3333;
+    animation: pulseText 0.2s infinite alternate;
+}

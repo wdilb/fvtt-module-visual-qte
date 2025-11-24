@@ -51,6 +51,7 @@ class VisualQTE {
 
         // 2. 合并默认参数
         const data = foundry.utils.mergeObject({
+            title: "",      // 默认标题为空字符串
             mode: 'sequence', 
             count: 3,
             duration: 2500,
@@ -212,6 +213,7 @@ class QTEDialog extends FormApplication {
     async _updateObject(event, formData) {
         const gmPlay = formData.gmPlay;
         const mode = formData.mode;
+        const title = formData.customTitle;
 
         // 解析目标玩家 IDs
         const targetIds = [];
@@ -229,6 +231,7 @@ class QTEDialog extends FormApplication {
         // 根据模式组装参数
         if (mode === 'sequence') {
             VisualQTE.trigger({ 
+                title,
                 mode: 'sequence',
                 count: parseInt(formData.count), 
                 duration: parseInt(formData.difficulty),
@@ -237,6 +240,7 @@ class QTEDialog extends FormApplication {
             });
         } else {
             VisualQTE.trigger({
+                title,
                 mode: 'mash',
                 mashDecay: parseInt(formData.mashDecay),
                 mashDuration: parseInt(formData.mashDuration),
@@ -259,6 +263,7 @@ class QTEOverlay {
     // --- 通用状态 ---
     static isActive = false;
     static mode = null;
+    static title = ""; 
 
     // --- Sequence 模式变量 ---
     static sequence = [];
@@ -287,6 +292,7 @@ class QTEOverlay {
         
         QTEOverlay.isActive = true;
         QTEOverlay.mode = data.mode;
+        QTEOverlay.title = data.title || ""; 
 
         // 模式分发
         if (data.mode === 'sequence') {
@@ -327,7 +333,8 @@ class QTEOverlay {
             <div id="qte-overlay">
                 <div class="qte-mash-wrapper">
                     <div class="qte-mash-prompt">PRESS SPACE!</div>
-                    
+
+                    <div class="qte-timer">--.--s</div>
                     <div class="qte-mash-row">
                         <!-- 左侧图标：玩家 -->
                         <div class="mash-icon player"><i class="fas fa-fist-raised"></i></div>
@@ -395,6 +402,14 @@ class QTEOverlay {
         const deltaTime = (now - this.lastFrameTime) / 1000;
         this.lastFrameTime = now;
 
+        // --- 计算并更新倒计时 ---
+        const remaining = Math.max(0, (this.mashEndTime - now) / 1000);
+        const timerEl = $('.qte-timer');
+        timerEl.text(remaining.toFixed(2) + 's'); // 保留2位小数
+        
+        // 如果少于 3秒，加红色警告样式
+        if (remaining <= 3) timerEl.addClass('urgent');
+
         // 1. 计算衰减
         this.mashProgress -= this.mashDecay * deltaTime;
 
@@ -446,9 +461,11 @@ class QTEOverlay {
         this.playSound(cssClass);
 
         const color = success ? '#4ade80' : '#f87171';
+        // 如果有自定义标题则使用，否则默认为"连打挑战"
+        const displayTitle = this.title ? this.title : "连打挑战";
         ChatMessage.create({
             content: `<div style="text-align:center; padding:5px; border:1px solid #444; background:#222; color:${color}; font-weight:bold; font-family:'Signika';">
-                ${game.user.name} 连打挑战: ${text}
+                ${game.user.name} ${displayTitle}: ${text}
             </div>`
         });
 
@@ -590,8 +607,10 @@ class QTEOverlay {
             `;
         });
 
+        // 默认基础标题
+        let baseTitle = this.title ? this.title : "挑战"; 
         // 计算评价标题
-        let totalScoreTitle = "挑战失败";
+        let totalScoreTitle = `${baseTitle} 失败`;
         let totalScoreColor = "#f87171";
         const totalCount = QTEOverlay.results.length;
         const failRatio = fails / totalCount;
@@ -599,14 +618,14 @@ class QTEOverlay {
         if (failRatio <= 0.3) { 
             if (fails === 0) {
                 if (perfects === totalCount) {
-                    totalScoreTitle = "完美达成!!";
+                    totalScoreTitle = `${baseTitle} 完美达成!!`;
                     totalScoreColor = "#ffd700";
                 } else {
-                    totalScoreTitle = "全部成功!";
+                    totalScoreTitle = `${baseTitle} 全部成功!`;
                     totalScoreColor = "#4ade80";
                 }
             } else {
-                totalScoreTitle = "挑战成功";
+                totalScoreTitle = `${baseTitle} 成功`;
                 totalScoreColor = "#fbbf24";
             }
         }

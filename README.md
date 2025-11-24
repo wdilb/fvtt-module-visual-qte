@@ -19,6 +19,7 @@ const qte = game.modules.get("visual-qte")?.api;
 
 // 触发精准点击 QTE 事件
 qte.trigger({
+    title: "比赛A",       // 标题，可以为空
     mode: 'sequence',    // 模式: sequence (精准点击)
     count: 3,            // 连击数: 需要按对几次
     duration: 2500,      // 速度: 光圈缩小的毫秒数 (越小越快/难)
@@ -32,6 +33,7 @@ qte.trigger({
 });
 //触发连打 QTE 事件
 qte.trigger({
+    title: "比赛A",       // 标题，可以为空
     mode: 'mash',        // 模式: mash (连打)
     mashPower: 6,        // 力度: 每次点击增加的进度 (1-20), 越小越难
     mashDecay: 30,       // 抵抗: 每秒自动减少的进度 (5-100), 越大越难
