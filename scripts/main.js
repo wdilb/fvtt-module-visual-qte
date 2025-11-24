@@ -57,6 +57,7 @@ class VisualQTE {
             windowSize: 300,
             mashDecay: 30,
             mashDuration: 10,
+            mashPower: 5,
             gmPlay: true,
             targetIds: []
         }, config);
@@ -235,6 +236,7 @@ class QTEDialog extends FormApplication {
                 mode: 'mash',
                 mashDecay: parseInt(formData.mashDecay),
                 mashDuration: parseInt(formData.mashDuration),
+                mashPower: parseInt(formData.mashPower), 
                 gmPlay, targetIds
             });
         }
@@ -301,6 +303,7 @@ class QTEOverlay {
         // 1. 初始化数据
         this.mashProgress = 50; 
         this.mashDecay = data.mashDecay; 
+        this.mashPower = data.mashPower;
         this.mashEndTime = Date.now() + (data.mashDuration * 1000);
         
         // 2. 创建 UI
@@ -340,16 +343,26 @@ class QTEOverlay {
 
         if (e.code === 'Space') {
             // 每次点击增加进度
-            this.mashProgress += 8;
-            if (this.mashProgress > 100) this.mashProgress = 100;
+            this.mashProgress += this.mashPower;
+            
+            // [修复]：按键瞬间立即判定胜利
+            // 如果不在这里判断，GameLoop里的衰减可能会在下一帧立刻把它拉回 <100
+            if (this.mashProgress >= 100) {
+                this.mashProgress = 100;
+                $('.qte-progress-fill').css('width', '100%'); // 视觉补满
+                this.endMash(true, "突破成功!");
+                return;
+            }
 
             // UI 实时反馈 (宽度 + 抖动动画)
             $('.qte-progress-fill').css('width', `${this.mashProgress}%`);
             
-            const wrapper = $('.qte-mash-wrapper');
-            wrapper.removeClass('shake-pulse');
-            void wrapper[0].offsetWidth; // 强制重绘以重置动画
-            wrapper.addClass('shake-pulse');
+            const track = $('.qte-progress-track');
+            track.removeClass('shake-pulse');
+            void track[0].offsetWidth; // 强制重绘
+            track.addClass('shake-pulse');
+
+            // TODO：在这里也可以播放点击音效
         }
     }
 
