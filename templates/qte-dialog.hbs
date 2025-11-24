@@ -1,32 +1,34 @@
-<form class="qte-config-form flexcol" autocomplete="off">
+<div class="qte-wrapper">
     <div class="qte-header-note">
         <i class="fas fa-gamepad fa-2x"></i>
         <span>配置 QTE 挑战的模式与参数。</span>
     </div>
 
-    <!-- 1. 模式选择 -->
+    <!-- 0. 模式选择 -->
     <div class="form-group">
         <label><i class="fas fa-chess-board"></i> 游戏模式</label>
         <div class="form-fields">
             <select name="mode" id="qte-mode-select">
-                <option value="sequence">精准点击 (Sequence)</option>
-                <option value="mash">疯狂连打 (Mashing)</option>
+                <option value="sequence" {{#if (eq mode "sequence")}}selected{{/if}}>精准点击 (Sequence)</option>
+                <option value="mash" {{#if (eq mode "mash")}}selected{{/if}}>疯狂连打 (Mashing)</option>
             </select>
         </div>
     </div>
 
-    <div class="form-group">
+    <hr>
+
+    <!-- 1. 标题 -->
+        <div class="form-group">
         <label><i class="fas fa-heading"></i> 事件标题 (Title)</label>
         <div class="form-fields">
-            <input type="text" name="customTitle" placeholder="默认: 挑战 ">
+            <input type="text" name="customTitle" placeholder="默认: 挑战 (例如: 掰手腕, 拆弹)">
         </div>
     </div>
 
-    <hr style="margin: 5px 0 10px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.2);">
+    <hr>
 
-    <!-- 区域 A: 连打模式参数 (默认隐藏，通过 JS 控制) -->
-    <div id="setting-mash" style="display: none;">
-        <!-- 第一行：力度 与 衰减 并排 -->
+    <!-- 区域 A: 连打模式参数 -->
+    <div id="setting-mash" style="display: {{#if (eq mode 'mash')}}block{{else}}none{{/if}};">
         <div class="qte-two-col">
             <div class="form-group">
                 <label><i class="fas fa-fist-raised"></i> 力度 (Power)</label>
@@ -45,19 +47,16 @@
             </div>
         </div>
         
-        <!-- 第二行：限时 -->
         <div class="form-group">
             <label><i class="fas fa-hourglass-half"></i> 限时 (Seconds)</label>
             <div class="form-fields">
                 <input type="number" name="mashDuration" value="10" min="3" max="60">
             </div>
         </div>
-        
-        <p class="notes" style="margin-top:-5px; margin-bottom: 10px;">力度 > 抵抗/点击频率 才能获胜。</p>
     </div>
 
     <!-- 区域 B: 序列模式参数 -->
-    <div id="setting-sequence">
+    <div id="setting-sequence" style="display: {{#if (eq mode 'sequence')}}block{{else}}none{{/if}};">
         <div class="form-group">
             <label><i class="fas fa-list-ol"></i> 连击次数</label>
             <div class="form-fields">
@@ -83,27 +82,31 @@
         </div>
     </div>
 
+    <hr>
+
     <!-- 通用参数 -->
     <div class="form-group">
         <label><i class="fas fa-users"></i> 选择目标</label>
         <div class="form-fields" style="flex-direction: column; gap: 5px;">
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 {{#each players}}
-                <label class="checkbox" style="display: flex; align-items: center; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc;">
+                <label class="checkbox" style="display: flex; align-items: center; background: rgba(0,0,0,0.2); padding: 2px 6px; border-radius: 4px; border: 1px solid #777;">
                     <input type="checkbox" name="targets.{{this.id}}" {{checked this.active}}>
-                    <span style="margin-left: 4px; font-weight: bold;">{{this.name}}</span>
+                    <span style="margin-left: 4px; font-weight: bold; color: {{this.color}};">{{this.name}}</span>
                 </label>
                 {{/each}}
             </div>
         </div>
     </div>
-    
+
     <div class="form-group">
         <label><i class="fas fa-user-secret"></i> GM 参与</label>
         <div class="form-fields"><input type="checkbox" name="gmPlay" checked></div>
     </div>
 
-    <footer class="sheet-footer flexrow" style="margin-top: 15px;">
-        <button type="submit"><i class="fas fa-check"></i> 开始挑战</button>
-    </footer>
-</form>
+    <div class="qte-footer">
+        <button type="submit">
+            <i class="fas fa-check"></i> 开始挑战
+        </button>
+    </div>
+</div>

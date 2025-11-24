@@ -129,122 +129,170 @@ Hooks.once("socketlib.ready", () => {
 
 // 在场景控制栏添加 GM 按钮
 Hooks.on('getSceneControlButtons', (controls) => {
+    // 如果不是 GM，直接退出
     if (!game.user.isGM) return;
     
-    const tokenTools = controls.find(c => c.name === 'token');
-    if (tokenTools) {
-        tokenTools.tools.push({
-            name: 'trigger-qte',
-            title: 'QTE 事件配置',
-            icon: 'fas fa-stopwatch',
-            onClick: () => VisualQTE.openDialog(),
-            button: true
-        });
+    // --- 定义按钮配置 ---
+    const qteTool = {
+        name: 'trigger-qte',
+        title: 'QTE 事件配置',
+        icon: 'fas fa-stopwatch',
+        visible: true,
+        button: true,
+        onChange: () => {
+            if (VisualQTE) VisualQTE.openDialog();
+        }
+    };
+
+    // --- 步骤 1: 找到 Token 层级 (Layer) ---
+    let tokenLayer = null;
+
+    // V13 模式: controls 是对象，直接通过属性访问
+    if (controls.tokens) {
+        tokenLayer = controls.tokens;
+    } 
+    // V12 模式: controls 是数组，通过查找 name 访问
+    else if (Array.isArray(controls)) {
+        tokenLayer = controls.find(c => c.name === 'token');
+    }
+
+    // --- 步骤 2: 注入按钮 ---
+    if (tokenLayer) {
+        const tools = tokenLayer.tools;
+
+        // V13 判断: 如果 tools 不是数组 (是对象或 Map)
+        if (tools && !Array.isArray(tools)) {
+            // 如果是 Map 类型 (V13 可能使用 JS Map)
+            if (tools instanceof Map) {
+                if (!tools.has('trigger-qte')) {
+                    tools.set('trigger-qte', qteTool);
+                }
+            } 
+            // 如果是普通 Object 类型 (从 Sequencer 代码推断可能是这种情况)
+            else {
+                tokenLayer.tools['trigger-qte'] = qteTool;
+            }
+        } 
+        // V12 判断: 如果 tools 是数组
+        else if (Array.isArray(tools)) {
+            if (!tools.some(t => t.name === 'trigger-qte')) {
+                tools.push(qteTool);
+            }
+        }
+    } else {
+        console.warn("Visual-QTE | 无法找到 Token 控制层级，按钮添加失败。");
     }
 });
 
 /* -------------------------------------------------------------------------- */
-/*                                3. 配置界面 UI                               */
+/*                     3. 配置界面 (Application V2)                            */
 /* -------------------------------------------------------------------------- */
 
-/**
- * QTE 参数配置窗口
- * 继承自 FormApplication，处理用户输入并调用 VisualQTE.trigger
- */
-class QTEDialog extends FormApplication {
-    constructor(object, options) { super(object, options); }
+const { ApplicationV2, HandlebarsApplicationMixin } = foundry.applications.api;
 
-    static get defaultOptions() {
-        return foundry.utils.mergeObject(super.defaultOptions, {
-            id: "qte-config-dialog",
-            title: "QTE 配置",
-            template: `modules/${MODULE_ID}/templates/qte-dialog.hbs`, 
-            classes: ["qte-config-window"], 
-            width: 440,
-            height: "auto",
+class QTEDialog extends HandlebarsApplicationMixin(ApplicationV2) {
+    
+    static DEFAULT_OPTIONS = {
+        tag: "form", 
+        id: "qte-config-dialog",
+        classes: ["qte-config-window"], 
+        window: {
+            icon: "fas fa-stopwatch",
+            title: "QTE 事件配置",
+            resizable: false
+        },
+        form: {
+            handler: QTEDialog.formHandler, 
             closeOnSubmit: true
-        });
-    }
+        }
+    };
+
+    static PARTS = {
+        form: {
+            template: `modules/${MODULE_ID}/templates/qte-dialog.hbs`
+        }
+    };
 
     /**
-     * 准备传递给 Handlebars 模板的数据
+     * 准备数据上下文
      */
-    getData() {
-        const data = super.getData();
-        // 获取所有在线用户 (用于目标选择列表)
-        data.players = game.users.filter(u => u.active && !u.isSelf).map(u => ({
+    async _prepareContext(options) {
+        const players = game.users.filter(u => u.active && !u.isSelf).map(u => ({
             id: u.id,
             name: u.name,
             color: u.color,
-            active: true // 默认全选
+            active: true
         }));
-        return data;
+
+        return {
+            players,
+            mode: 'sequence' 
+        };
     }
 
     /**
-     * 激活交互监听 (处理模式切换时的 UI 显隐)
+     * 绑定 DOM 监听器
      */
-    activateListeners(html) {
-        super.activateListeners(html);
-        
+    _onRender(context, options) {
+        // 在 V2 中，this.element 是根 HTML 元素
+        // 由于我们定义了 tag: 'form'，所以 this.element 就是那个 <form>
+        const html = $(this.element);
+
         const modeSelect = html.find('#qte-mode-select');
         const seqSettings = html.find('#setting-sequence');
         const mashSettings = html.find('#setting-mash');
 
-        modeSelect.change(ev => {
+        modeSelect.on('change', (ev) => {
             const mode = ev.target.value;
-            // 定义一个回调函数：动画结束后，强制窗口重新适应高度
+            // 回调：重新计算位置
             const resize = () => this.setPosition({ height: "auto" });
+
             if (mode === 'mash') {
                 seqSettings.hide();
-                // 在 slideDown 完成后调用 resize
                 mashSettings.slideDown(200, resize);
             } else {
                 mashSettings.hide();
-                // 在 slideDown 完成后调用 resize
                 seqSettings.slideDown(200, resize);
             }
         });
     }
 
     /**
-     * 提交表单时的逻辑处理
+     * 表单提交处理
      */
-    async _updateObject(event, formData) {
-        const gmPlay = formData.gmPlay;
-        const mode = formData.mode;
-        const title = formData.customTitle;
+    static async formHandler(event, form, formData) {
+        const data = formData.object;
 
-        // 解析目标玩家 IDs
+        const gmPlay = data.gmPlay;
+        const mode = data.mode;
+        const title = data.customTitle;
+
+        // 解析 targets.ID
         const targetIds = [];
-        for (let [key, value] of Object.entries(formData)) {
+        for (let [key, value] of Object.entries(data)) {
             if (key.startsWith('targets.') && value === true) {
                 targetIds.push(key.split('.')[1]);
             }
         }
         
-        // 如果是指定模式且 GM 也要玩，手动加入 GM ID
         if (targetIds.length > 0 && gmPlay && !targetIds.includes(game.user.id)) {
             targetIds.push(game.user.id);
         }
 
-        // 根据模式组装参数
         if (mode === 'sequence') {
             VisualQTE.trigger({ 
-                title,
-                mode: 'sequence',
-                count: parseInt(formData.count), 
-                duration: parseInt(formData.difficulty),
-                windowSize: parseInt(formData.windowSize),
+                title, mode: 'sequence',
+                count: parseInt(data.count), 
+                duration: parseInt(data.difficulty),
+                windowSize: parseInt(data.windowSize),
                 gmPlay, targetIds
             });
         } else {
             VisualQTE.trigger({
-                title,
-                mode: 'mash',
-                mashDecay: parseInt(formData.mashDecay),
-                mashDuration: parseInt(formData.mashDuration),
-                mashPower: parseInt(formData.mashPower), 
+                title, mode: 'mash',
+                mashDecay: parseInt(data.mashDecay),
+                mashDuration: parseInt(data.mashDuration),
+                mashPower: parseInt(data.mashPower),
                 gmPlay, targetIds
             });
         }
@@ -651,11 +699,13 @@ class QTEOverlay {
 
     /**
      * 播放音效辅助函数
+     * 修复警告：使用 foundry.audio.AudioHelper 替代全局 AudioHelper
      */
     static playSound(cssClass) {
         let src = SOUNDS.BAD;
         if (cssClass === 'result-perfect') src = SOUNDS.PERFECT;
         else if (cssClass === 'result-good') src = SOUNDS.GOOD;
-        AudioHelper.play({src: src, volume: 0.8, loop: false}, false);
+        // --- 添加 foundry.audio. 前缀 ---
+        foundry.audio.AudioHelper.play({src: src, volume: 0.8, loop: false}, false);
     }
 }

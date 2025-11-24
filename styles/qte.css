@@ -120,53 +120,96 @@
     to { transform: scale(0); opacity: 1; }
 }
 
+/* 让 wrapper 占满空间 */
+.qte-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 8px; /* 元素间距 */
+    height: 100%;
+}
+
+/* 确保窗口内容不出现双重滚动条 */
+.qte-config-window form {
+    height: 100%;
+    overflow-y: auto; /* 允许内部滚动 */
+    padding-right: 5px; /* 给滚动条留点位置 */
+}
 /* =========================================
-   新增：Dialog 美化样式
+   Dialog 样式 (适配 V13 Application V2)
    ========================================= */
-.qte-config-window .window-content {
-    background: url(../../../ui/parchment.jpg) repeat; /* 使用 FVTT 默认羊皮纸背景，或者换成深色 */
+
+/* 让 V2 窗口背景像样一点 */
+.qte-config-window {
     padding: 10px;
-    color: #191813;
+    font-family: 'Signika', sans-serif;
+    color: var(--color-text-light-primary);
+    
+    /* 在这里指定宽度，而不是在 JS 里 */
+    width: 460px !important;
+    height: auto !important;
 }
 
-/* 让表单更加紧凑 */
-.qte-config-form .form-group {
-    margin-bottom: 8px; /* 减少行间距 */
+/* 隐藏 V2 默认的 overflow-y，防止不必要的滚动条 */
+.qte-config-window form {
+    overflow-y: hidden;
+}
+
+/* 并排布局样式 */
+.qte-two-col {
+    display: flex;
+    gap: 15px;
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+.qte-two-col .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column !important;
     align-items: center;
+    height: auto !important;
+    margin: 0;
+    gap: 4px;
 }
 
-.qte-config-form label {
+.qte-two-col input {
+    width: 100%;
+    text-align: center;
+}
+
+.qte-two-col label {
     font-weight: bold;
-    flex: 2;
+    font-size: 13px;
 }
 
-.qte-config-form .form-fields {
-    flex: 1.5;
+.qte-two-col .notes {
+    font-size: 11px;
+    color: var(--color-text-dark-secondary); /* 使用 FVTT 原生变量适配深色模式 */
+    margin: 0;
+    text-align: center;
 }
 
-/* 顶部说明文字 */
+/* 顶部说明框 */
 .qte-header-note {
-    background: rgba(0, 0, 0, 0.05);
-    border: 1px solid rgba(0, 0, 0, 0.1);
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--color-border-light-primary);
     border-radius: 4px;
     padding: 8px;
-    margin-bottom: 12px !important; /* 强制覆盖默认边距 */
+    margin-bottom: 12px;
     font-size: 13px;
-    color: #4b4a44;
     display: flex;
     align-items: center;
-    gap: 8px;
+    gap: 10px;
 }
 
 /* 底部按钮 */
-.qte-config-form button {
-    background: rgba(0, 0, 0, 0.8);
-    color: #fff;
-    border: 1px solid #000;
+.qte-footer {
+    margin-top: 15px;
+    display: flex;
+    justify-content: center;
 }
-.qte-config-form button:hover {
-    background: #ff0055; /* 呼应 QTE 的红色 */
-    box-shadow: 0 0 10px #ff0055;
+.qte-footer button {
+    width: 100%;
 }
 
 /* =========================================
