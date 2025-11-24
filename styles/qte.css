@@ -83,9 +83,12 @@
 }
 
 .qte-key-prompt.space {
-    width: 160px;
+    width: 130px;
+    height: 60px;
     font-size: 24px;
     border-radius: 8px;
+    /*增加透明度 (0.9)，让判定线能稍微透出来一点 */
+    background: linear-gradient(145deg, rgba(26,26,26,0.9), rgba(42,42,42,0.9)); 
 }
 
 /* 结果反馈文字 */

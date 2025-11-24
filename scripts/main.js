@@ -46,7 +46,7 @@ class VisualQTE {
      * @param {boolean} [options.gmPlay=true] - GM 是否参与游戏
      * @param {Array<string>} [options.targetIds=[]] 指定的目标玩家ID列表，为空则广播所有人
      */
-    static trigger({ count = 3, duration = 2500, gmPlay = true, targetIds = []  } = {}) {
+    static trigger({ count = 3, duration = 2500, gmPlay = true, targetIds = [], windowSize = 300 } = {}) {
         // 环境检查
         if (!qteSocket) {
             ui.notifications.error("Visual-QTE | Socketlib 未加载，无法运行。");
@@ -75,7 +75,7 @@ class VisualQTE {
                 targetKey: keyCode,
                 duration: duration,
                 hitTime: targetTime,
-                windowSize: 300 // 判定窗口宽容度 (ms)
+                windowSize: windowSize // 判定窗口宽容度 (ms)
             });
         }
 
@@ -189,7 +189,7 @@ class QTEDialog extends FormApplication {
         const count = parseInt(formData.count);
         const gmPlay = formData.gmPlay;
         const duration = parseInt(formData.difficulty);
-
+        const windowSize = parseInt(formData.windowSize);
         // --- 解析玩家目标 ---
         const targetIds = [];
         for (let [key, value] of Object.entries(formData)) {
@@ -206,7 +206,7 @@ class QTEDialog extends FormApplication {
         }
         
         // 委托核心逻辑处理
-        VisualQTE.trigger({ count, duration, gmPlay, targetIds  });
+        VisualQTE.trigger({ count, duration, gmPlay, targetIds, windowSize  });
     }
 }
 
