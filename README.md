@@ -21,9 +21,13 @@ const qte = game.modules.get("visual-qte")?.api;
 // 触发QTE事件
 
 qte.trigger({
+
     count: 5,        // 5连击
+    
     duration: 2000,  // 速度 2000ms
+    
     gmPlay: true     // GM也参与游戏
+    
 });
 
 // 或者直接打开配置窗口
