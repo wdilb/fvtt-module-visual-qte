@@ -27,5 +27,6 @@
   "styles": [
     "styles/qte.css"
   ],
-  "description": "一个简单的QTEmod，GM发起让所有人可以进行QTE的游戏。"
+  "description": "一个简单的QTEmod，GM发起让所有人可以进行QTE的游戏。",
+  "url": "https://github.com/wdilb/fvtt-module-visual-qte"
 }

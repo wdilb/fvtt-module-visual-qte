@@ -362,14 +362,23 @@ class QTEOverlay {
         // 综合评价
         let totalScoreTitle = "挑战失败";
         let totalScoreColor = "#f87171";
+
+        const totalCount = QTEOverlay.results.length;
+        const failRatio = fails / totalCount;
         
-        if (fails === 0) {
-            if (perfects === QTEOverlay.results.length) {
-                totalScoreTitle = "S级 完美达成";
-                totalScoreColor = "#ffd700";
+        if (failRatio <= 0.3) { // 失败次数不超过30%
+            if (fails === 0) {
+                if (perfects === totalCount) {
+                    totalScoreTitle = "完美达成!!";
+                    totalScoreColor = "#ffd700";
+                } else {
+                    totalScoreTitle = "全部成功!";
+                    totalScoreColor = "#4ade80";
+                }
             } else {
+                // 有失败但不超过30%
                 totalScoreTitle = "挑战成功";
-                totalScoreColor = "#4ade80";
+                totalScoreColor = "#fbbf24"; // 橙色表示勉强
             }
         }
 
