@@ -46,7 +46,7 @@ class VisualQTE {
      * @param {boolean} [options.gmPlay=true] - GM 是否参与游戏
      * @param {Array<string>} [options.targetIds=[]] 指定的目标玩家ID列表，为空则广播所有人
      */
-    static trigger({ count = 3, duration = 2500, gmPlay = true } = {}) {
+    static trigger({ count = 3, duration = 2500, gmPlay = true, targetIds = []  } = {}) {
         // 环境检查
         if (!qteSocket) {
             ui.notifications.error("Visual-QTE | Socketlib 未加载，无法运行。");
