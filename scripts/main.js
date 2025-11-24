@@ -44,6 +44,7 @@ class VisualQTE {
      * @param {number} [options.count=3] - 连击次数 (生成几个按键)
      * @param {number} [options.duration=2500] - 单次 QTE 的持续时间 (毫秒)，越小越难
      * @param {boolean} [options.gmPlay=true] - GM 是否参与游戏
+     * @param {Array<string>} [options.targetIds=[]] 指定的目标玩家ID列表，为空则广播所有人
      */
     static trigger({ count = 3, duration = 2500, gmPlay = true } = {}) {
         // 环境检查
@@ -80,9 +81,19 @@ class VisualQTE {
 
         const payload = { sequence, gmPlay };
 
-        // 广播事件至所有客户端
-        qteSocket.executeForEveryone("startQTESequence", payload);
-        ui.notifications.info(`QTE 触发: ${count} 连击 (速度: ${duration}ms)`);
+        if (targetIds && targetIds.length > 0) {
+            // 发送给指定玩家 (利用 socketlib 的 executeForUsers)
+            // 这种模式下，不在列表里的人(包括GM)完全不会收到信号，所以不需要在客户端判断 gmPlay
+            // socketlib 的 executeForUsers 会自动根据targetIds来发送，发送给特定玩家的参数是不带ID的，所以不需要修改下面的客户端逻辑
+            qteSocket.executeForUsers("startQTESequence", targetIds, payload);
+            ui.notifications.info(`QTE 已发送给 ${targetIds.length} 位指定玩家。`);
+        }
+        else{
+            // 广播事件至所有客户端
+            qteSocket.executeForEveryone("startQTESequence", payload);
+            ui.notifications.info(`QTE 触发: ${count} 连击 (速度: ${duration}ms)`);
+        }
+        
     }
 
     /**
@@ -144,12 +155,29 @@ class QTEDialog extends FormApplication {
         return foundry.utils.mergeObject(super.defaultOptions, {
             id: "qte-config-dialog",
             title: "QTE 配置",
-            template: `modules/${MODULE_ID}/templates/qte-dialog.html`, 
+            template: `modules/${MODULE_ID}/templates/qte-dialog.hbs`, 
             classes: ["qte-config-window"], 
             width: 350,
             height: "auto",
             closeOnSubmit: true
         });
+    }
+    /**
+     * 准备传递给 HTML 模板的数据
+     * 这里我们需要获取所有非 GM 的在线玩家
+     */
+    getData() {
+        const data = super.getData();
+        
+        // 获取所有在线用户 
+        data.players = game.users.filter(u => u.active && !u.isSelf).map(u => ({
+            id: u.id,
+            name: u.name,
+            color: u.color,
+            active: true // 默认全选
+        }));
+        
+        return data;
     }
 
     /**
@@ -161,9 +189,24 @@ class QTEDialog extends FormApplication {
         const count = parseInt(formData.count);
         const gmPlay = formData.gmPlay;
         const duration = parseInt(formData.difficulty);
+
+        // --- 解析玩家目标 ---
+        const targetIds = [];
+        for (let [key, value] of Object.entries(formData)) {
+            if (key.startsWith('targets.') && value === true) {
+                const userId = key.split('.')[1];
+                targetIds.push(userId);
+            }
+        }
+        // 如果 GM 勾选了 "GM 参与"，则把 GM 自己的 ID 也加进去 (如果是指定模式)
+        if (targetIds.length > 0 && gmPlay) {
+            if (!targetIds.includes(game.user.id)) {
+                targetIds.push(game.user.id);
+            }
+        }
         
         // 委托核心逻辑处理
-        VisualQTE.trigger({ count, duration, gmPlay });
+        VisualQTE.trigger({ count, duration, gmPlay, targetIds  });
     }
 }
 

@@ -35,6 +35,23 @@
         </div>
     </div>
 
+    <!-- 玩家选择列表 -->
+    <div class="form-group" style="align-items: flex-start;">
+        <label><i class="fas fa-users"></i> 选择目标 (Targets)</label>
+        <div class="form-fields" style="flex-direction: column; gap: 5px;">
+            <p class="notes" style="margin: 0 0 5px 0;">如果不勾选任何玩家，则默认为"发送给所有人"。</p>
+            <div style="display: flex; flex-wrap: wrap; gap: 10px;">
+                {{#each players}}
+                <label class="checkbox" style="display: flex; align-items: center; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc;">
+                    <!-- 注意：这里 name 使用 targets.ID 的格式，方便 JS 解析 -->
+                    <input type="checkbox" name="targets.{{this.id}}" {{checked this.active}}>
+                    <span style="margin-left: 4px; font-weight: bold; color: {{this.color}};">{{this.name}}</span>
+                </label>
+                {{/each}}
+            </div>
+        </div>
+    </div>
+
     <footer class="sheet-footer flexrow" style="margin-top: 15px;">
         <button type="submit" name="submit">
             <i class="fas fa-check"></i> 开始挑战
