@@ -1,69 +1,88 @@
 <form class="qte-config-form flexcol" autocomplete="off">
-    <!-- 顶部说明 -->
     <div class="qte-header-note">
         <i class="fas fa-gamepad fa-2x"></i>
-        <span>配置 QTE 挑战的连击数与难度系数。</span>
+        <span>配置 QTE 挑战的模式与参数。</span>
     </div>
 
-    <!-- 连击次数 -->
+    <!-- 1. 模式选择 -->
     <div class="form-group">
-        <label><i class="fas fa-list-ol"></i> 连击次数 (Count)</label>
+        <label><i class="fas fa-chess-board"></i> 游戏模式</label>
         <div class="form-fields">
-            <input type="number" name="count" value="3" min="1" max="20" step="1" autofocus style="text-align: center;">
-        </div>
-    </div>
-
-    <!--判定宽容度 -->
-    <div class="form-group">
-        <label><i class="fas fa-bullseye"></i> 判定宽容度 (Window)</label>
-        <div class="form-fields">
-            <input type="number" name="windowSize" value="300" min="50" max="1000" step="10" style="text-align: center;">
-        </div>
-        <p class="notes" style="flex: 100%; margin: 4px 0 0 0; font-size: 12px;">(毫秒) 值越大判定越宽松。</p>
-    </div>
-
-    <!-- GM 是否参与 -->
-    <div class="form-group">
-        <label><i class="fas fa-user-secret"></i> GM 参与游戏</label>
-        <div class="form-fields">
-            <input type="checkbox" name="gmPlay" checked>
-        </div>
-    </div>
-
-    <!-- 难度/速度 -->
-    <div class="form-group">
-        <label><i class="fas fa-tachometer-alt"></i> 速度等级 (Speed)</label>
-        <div class="form-fields">
-            <select name="difficulty">
-                <option value="3000">简单 (3.0s)</option>
-                <option value="2500" selected>普通 (2.5s)</option>
-                <option value="1500">困难 (1.5s)</option>
-                <option value="1000">极难 (1.0s)</option>
-                <option value="600">地狱 (0.6s)</option>
+            <select name="mode" id="qte-mode-select">
+                <option value="sequence">精准点击 (Sequence)</option>
+                <option value="mash">疯狂连打 (Mashing)</option>
             </select>
         </div>
     </div>
 
-    <!-- 玩家选择列表 -->
-    <div class="form-group" style="align-items: flex-start;">
-        <label><i class="fas fa-users"></i> 选择目标 (Targets)</label>
+    <hr style="margin: 5px 0 10px 0; border: 0; border-top: 1px solid rgba(0,0,0,0.2);">
+
+    <!-- 区域 A: 连打模式参数 (默认隐藏，通过 JS 控制) -->
+    <div id="setting-mash" style="display: none;">
+        <div class="form-group">
+            <label><i class="fas fa-weight-hanging"></i> 抵抗强度 (Decay)</label>
+            <div class="form-fields">
+                <input type="number" name="mashDecay" value="30" min="5" max="80" step="5">
+            </div>
+            <p class="notes" style="flex: 100%; margin:0;">值越大，进度条倒退越快 (5-80)。</p>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-hourglass-half"></i> 限时 (Seconds)</label>
+            <div class="form-fields">
+                <input type="number" name="mashDuration" value="10" min="3" max="30">
+            </div>
+            <p class="notes" style="flex: 100%; margin:0;">如果在限时内未填满或归零，判负。</p>
+        </div>
+    </div>
+
+    <!-- 区域 B: 序列模式参数 -->
+    <div id="setting-sequence">
+        <div class="form-group">
+            <label><i class="fas fa-list-ol"></i> 连击次数</label>
+            <div class="form-fields">
+                <input type="number" name="count" value="3" min="1" max="20">
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-tachometer-alt"></i> 速度等级</label>
+            <div class="form-fields">
+                <select name="difficulty">
+                    <option value="3000">简单 (3.0s)</option>
+                    <option value="2500" selected>普通 (2.5s)</option>
+                    <option value="1500">困难 (1.5s)</option>
+                    <option value="1000">极难 (1.0s)</option>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fas fa-bullseye"></i> 判定宽容度</label>
+            <div class="form-fields">
+                <input type="number" name="windowSize" value="300" min="50" max="1000" step="10">
+            </div>
+        </div>
+    </div>
+
+    <!-- 通用参数 -->
+    <div class="form-group">
+        <label><i class="fas fa-users"></i> 选择目标</label>
         <div class="form-fields" style="flex-direction: column; gap: 5px;">
-            <p class="notes" style="margin: 0 0 5px 0;">如果不勾选任何玩家，则默认为"发送给所有人"。</p>
             <div style="display: flex; flex-wrap: wrap; gap: 10px;">
                 {{#each players}}
                 <label class="checkbox" style="display: flex; align-items: center; background: rgba(0,0,0,0.05); padding: 2px 6px; border-radius: 4px; border: 1px solid #ccc;">
-                    <!-- 注意：这里 name 使用 targets.ID 的格式，方便 JS 解析 -->
                     <input type="checkbox" name="targets.{{this.id}}" {{checked this.active}}>
-                    <span style="margin-left: 4px; font-weight: bold; color: {{this.color}};">{{this.name}}</span>
+                    <span style="margin-left: 4px; font-weight: bold;">{{this.name}}</span>
                 </label>
                 {{/each}}
             </div>
         </div>
     </div>
+    
+    <div class="form-group">
+        <label><i class="fas fa-user-secret"></i> GM 参与</label>
+        <div class="form-fields"><input type="checkbox" name="gmPlay" checked></div>
+    </div>
 
     <footer class="sheet-footer flexrow" style="margin-top: 15px;">
-        <button type="submit" name="submit">
-            <i class="fas fa-check"></i> 开始挑战
-        </button>
+        <button type="submit"><i class="fas fa-check"></i> 开始挑战</button>
     </footer>
 </form>
