@@ -1,7 +1,7 @@
 {
   "id": "visual-qte",
   "title": "QTE",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "compatibility": {
     "minimum": "12",
     "verified": "12"
