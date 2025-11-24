@@ -1,6 +1,6 @@
-# Visual QTE - Foundry 虚拟桌布快速反应事件模块
+# Visual QTE - Fvtt QTE 模块
 
-一个为 Foundry Virtual Tabletop 设计的简单而强大的QTE（快速反应事件）模块。
+一个为 Foundry Virtual Tabletop 设计的简单的QTE模块。
 
 ## 🚀 使用方法
 
