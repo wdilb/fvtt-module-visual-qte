@@ -313,6 +313,11 @@ class QTEOverlay {
     static handleKey(event, data) {
         // 忽略重复按键和修饰键
         if (event.repeat || event.ctrlKey || event.altKey || event.metaKey) return;
+
+        // 阻止按键事件传递给 FVTT 的画布层和浏览器默认行为
+        event.preventDefault(); 
+        event.stopPropagation(); 
+
         const pressedKey = event.code;
 
         // 判定按键正确性
