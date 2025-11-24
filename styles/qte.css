@@ -170,6 +170,54 @@
 }
 
 /* =========================================
+   新增：Dialog 并排布局样式
+   ========================================= */
+.qte-two-col {
+    display: flex;
+    gap: 15px; /* 增加列之间的间距 */
+    justify-content: space-between;
+    margin-bottom: 10px;
+}
+
+/* 强制重写 form-group 的默认行为，改为垂直堆叠 */
+.qte-two-col .form-group {
+    flex: 1;
+    display: flex;
+    flex-direction: column !important; /* 强制垂直排列 */
+    align-items: center;
+    height: auto !important; /* 关键：允许高度自动撑开，防止重叠 */
+    margin: 0;
+    gap: 4px;
+}
+
+.qte-two-col label {
+    flex: initial !important;
+    text-align: center;
+    font-weight: bold;
+    width: 100%;
+}
+
+.qte-two-col .form-fields {
+    flex: initial !important;
+    width: 100%;
+}
+
+.qte-two-col input {
+    width: 100%;
+    text-align: center;
+}
+
+/* 说明文字样式 */
+.qte-two-col .notes {
+    flex: initial !important;
+    margin: 0 !important;
+    font-size: 11px;
+    color: #666;
+    text-align: center;
+    white-space: nowrap; /* 防止文字换行导致更难看 */
+}
+
+/* =========================================
    连打模式 (Mash Mode) 专用样式
    ========================================= */
 
@@ -178,77 +226,129 @@
     position: absolute;
     top: 70%; left: 50%;
     transform: translate(-50%, -50%);
-    width: 600px;
+    width: 650px; /* 稍微加宽以容纳图标 */
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 15px;
+    gap: 10px;
 }
 
-/* 进度条外框 */
-.qte-progress-track {
-    width: 100%;
-    height: 50px;
-    background: #1a1a1a;
-    border: 3px solid #fff;
-    border-radius: 25px; /* 圆角 */
-    overflow: hidden;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
-    position: relative;
-}
-
-/* 进度条填充层 */
-.qte-progress-fill {
-    height: 100%;
-    width: 50%; /* 初始 50% */
-    background: linear-gradient(90deg, #ff0055, #ffcc00); /* 激烈的红黄渐变 */
-    box-shadow: 0 0 15px #ff0055;
-    transition: width 0.05s linear; /* 线性过渡，保证流畅但跟手 */
-    position: relative;
-}
-
-/* 进度条上的高光纹理 (增加质感) */
-.qte-progress-fill::after {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0; bottom: 0;
-    background: linear-gradient(
-        45deg, 
-        rgba(255,255,255,0.2) 25%, 
-        transparent 25%, 
-        transparent 50%, 
-        rgba(255,255,255,0.2) 50%, 
-        rgba(255,255,255,0.2) 75%, 
-        transparent 75%, 
-        transparent
-    );
-    background-size: 20px 20px;
-    opacity: 0.5;
-}
-
-/* 按键抖动动画类 */
-.shake-pulse {
-    animation: shake 0.1s cubic-bezier(.36,.07,.19,.97) both;
-}
-
-/* 抖动关键帧 */
-@keyframes shake {
-    10%, 90% { transform: translate3d(-1px, 0, 0); } /* 幅度从2px改为1px */
-    20%, 80% { transform: translate3d(2px, 0, 0); }  /* 幅度从4px改为2px */
-    30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }
-    40%, 60% { transform: translate3d(2px, 0, 0); }
-}
-
-/* 连打时的按键提示 (大号) */
+/* 连打提示文字 */
 .qte-mash-prompt {
     font-size: 36px;
     font-weight: 900;
     color: #fff;
     text-shadow: 0 0 10px #00d2ff;
     animation: pulseText 0.5s infinite alternate;
+    margin-bottom: 5px;
 }
 
+/* 新增：图标行容器 (骷髅 - 进度条 - 拳头) */
+.qte-mash-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 15px;
+    width: 100%;
+}
+
+/* 侧边图标样式 */
+.mash-icon {
+    font-size: 42px;
+    filter: drop-shadow(0 0 8px rgba(0,0,0,0.8));
+    width: 50px;
+    text-align: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* 敌人图标动画 */
+.mash-icon.enemy { 
+    color: #ff0055; 
+    animation: pulseEnemy 0.8s infinite alternate; 
+}
+/* 玩家图标 */
+.mash-icon.player { 
+    color: #ffcc00; 
+}
+
+/* 进度条外框 (金属质感) */
+.qte-progress-track {
+    flex: 1; /* 占满中间剩余空间 */
+    height: 50px;
+    background: #0d0d0d;
+    border: 3px solid #555;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: inset 0 0 15px #000, 0 0 20px rgba(0,0,0,0.6);
+    position: relative;
+}
+
+/* 中间的分界线 (50%处) */
+.qte-progress-track::before {
+    content: '';
+    position: absolute;
+    left: 50%; top: 0; bottom: 0;
+    width: 2px;
+    background: rgba(255,255,255,0.2);
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* 进度条填充层 */
+.qte-progress-fill {
+    height: 100%;
+    width: 50%;
+    /* 激烈的渐变色：深红 -> 亮红 -> 金黄 */
+    background: linear-gradient(90deg, #880000 0%, #ff0044 60%, #ffcc00 100%);
+    box-shadow: 0 0 15px #ff0044;
+    position: relative;
+    transition: width 0.05s linear; /* 保证跟手 */
+}
+
+/* 高光闪烁效果 (JS控制添加 .flash 类) */
+.qte-progress-fill.flash {
+    filter: brightness(1.6);
+}
+
+/* 进度条纹理 */
+.qte-progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0; bottom: 0;
+    background: linear-gradient(
+        45deg, 
+        rgba(255,255,255,0.15) 25%, 
+        transparent 25%, 
+        transparent 50%, 
+        rgba(255,255,255,0.15) 50%, 
+        rgba(255,255,255,0.15) 75%, 
+        transparent 75%, 
+        transparent
+    );
+    background-size: 20px 20px;
+}
+
+/* 动画定义 */
 @keyframes pulseText {
     from { transform: scale(1); opacity: 0.8; }
-    to { transform: scale(1.1); opacity: 1; }
+    to { transform: scale(1.05); opacity: 1; }
+}
+
+@keyframes pulseEnemy {
+    from { transform: scale(1); filter: drop-shadow(0 0 5px #ff0055); }
+    to { transform: scale(1.15); filter: drop-shadow(0 0 15px #ff0055); }
+}
+
+/* 抖动动画 (仅作用于轨道) */
+.shake-pulse {
+    animation: shake 0.1s cubic-bezier(.36,.07,.19,.97) both;
+}
+
+@keyframes shake {
+    10%, 90% { transform: translate3d(-1px, 0, 0); }
+    20%, 80% { transform: translate3d(2px, 0, 0); }
+    30%, 50%, 70% { transform: translate3d(-2px, 0, 0); }
+    40%, 60% { transform: translate3d(2px, 0, 0); }
 }

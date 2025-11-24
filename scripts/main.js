@@ -57,7 +57,7 @@ class VisualQTE {
             windowSize: 300,
             mashDecay: 30,
             mashDuration: 10,
-            mashPower: 5,
+            mashPower: 6,
             gmPlay: true,
             targetIds: []
         }, config);
@@ -159,7 +159,7 @@ class QTEDialog extends FormApplication {
             title: "QTE 配置",
             template: `modules/${MODULE_ID}/templates/qte-dialog.hbs`, 
             classes: ["qte-config-window"], 
-            width: 400,
+            width: 440,
             height: "auto",
             closeOnSubmit: true
         });
@@ -192,12 +192,16 @@ class QTEDialog extends FormApplication {
 
         modeSelect.change(ev => {
             const mode = ev.target.value;
+            // 定义一个回调函数：动画结束后，强制窗口重新适应高度
+            const resize = () => this.setPosition({ height: "auto" });
             if (mode === 'mash') {
                 seqSettings.hide();
-                mashSettings.slideDown(200);
+                // 在 slideDown 完成后调用 resize
+                mashSettings.slideDown(200, resize);
             } else {
                 mashSettings.hide();
-                seqSettings.slideDown(200);
+                // 在 slideDown 完成后调用 resize
+                seqSettings.slideDown(200, resize);
             }
         });
     }
@@ -323,8 +327,18 @@ class QTEOverlay {
             <div id="qte-overlay">
                 <div class="qte-mash-wrapper">
                     <div class="qte-mash-prompt">PRESS SPACE!</div>
-                    <div class="qte-progress-track">
-                        <div class="qte-progress-fill" style="width: 50%;"></div>
+                    
+                    <div class="qte-mash-row">
+                        <!-- 左侧图标：玩家 -->
+                        <div class="mash-icon player"><i class="fas fa-fist-raised"></i></div>
+                        
+                        <!-- 进度条轨道 -->
+                        <div class="qte-progress-track">
+                            <div class="qte-progress-fill" style="width: 50%;"></div>
+                        </div>
+                        
+                        <!-- 右侧图标：系统/BOSS -->
+                        <div class="mash-icon enemy"><i class="fas fa-skull"></i></div>
                     </div>
                 </div>
                 <div id="qte-result-text" class="qte-result"></div>
@@ -354,12 +368,20 @@ class QTEOverlay {
                 return;
             }
 
-            // UI 实时反馈 (宽度 + 抖动动画)
-            $('.qte-progress-fill').css('width', `${this.mashProgress}%`);
+            // 更新宽度
+            const fill = $('.qte-progress-fill');
+            fill.css('width', `${this.mashProgress}%`);
             
+            // --- 新增：高光闪烁 ---
+            // 移除类 -> 强制重绘 -> 添加类 (实现每次点击都闪)
+            fill.removeClass('flash');
+            void fill[0].offsetWidth; 
+            fill.addClass('flash');
+
+            // 轨道抖动
             const track = $('.qte-progress-track');
             track.removeClass('shake-pulse');
-            void track[0].offsetWidth; // 强制重绘
+            void track[0].offsetWidth; 
             track.addClass('shake-pulse');
 
             // TODO：在这里也可以播放点击音效
@@ -398,8 +420,24 @@ class QTEOverlay {
     }
 
     static endMash(success, text) {
+        // 1. 停止循环和原有监听
         cancelAnimationFrame(this.mashLoopId);
         document.removeEventListener('keydown', this.boundHandleKey);
+
+        // --- 新增：安全拦截器 (Cool-down Blocker) ---
+        // 防止玩家还在疯狂按空格，导致 QTE 结束后 Token 乱动或暂停游戏
+        const blocker = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+        };
+        // 挂载拦截器，捕获阶段执行
+        document.addEventListener('keydown', blocker, true);
+        
+        // 1.5秒后移除拦截器 (与 UI 消失时间同步)
+        setTimeout(() => {
+            document.removeEventListener('keydown', blocker, true);
+        }, 1500);
+        // ------------------------------------------
 
         const resEl = $('#qte-result-text');
         const cssClass = success ? 'result-perfect' : 'result-bad';
@@ -407,7 +445,6 @@ class QTEOverlay {
         
         this.playSound(cssClass);
 
-        // 生成简短战报
         const color = success ? '#4ade80' : '#f87171';
         ChatMessage.create({
             content: `<div style="text-align:center; padding:5px; border:1px solid #444; background:#222; color:${color}; font-weight:bold; font-family:'Signika';">

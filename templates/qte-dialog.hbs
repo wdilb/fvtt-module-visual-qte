@@ -19,27 +19,34 @@
 
     <!-- 区域 A: 连打模式参数 (默认隐藏，通过 JS 控制) -->
     <div id="setting-mash" style="display: none;">
-        <div class="form-group">
-            <label><i class="fas fa-weight-hanging"></i> 抵抗强度 (Decay)</label>
-            <div class="form-fields">
-                <input type="number" name="mashDecay" value="30" min="5" max="80" step="5">
+        <!-- 第一行：力度 与 衰减 并排 -->
+        <div class="qte-two-col">
+            <div class="form-group">
+                <label><i class="fas fa-fist-raised"></i> 力度 (Power)</label>
+                <div class="form-fields">
+                    <input type="number" name="mashPower" value="6" min="1" max="50">
+                </div>
+                <p class="notes">每次点击增加量</p>
             </div>
-            <p class="notes" style="flex: 100%; margin:0;">值越大，进度条倒退越快 (5-80)。</p>
-        </div>
-        <div class="form-group">
-            <label><i class="fas fa-fist-raised"></i> 点击力度 (Power)</label>
-            <div class="form-fields">
-                <input type="number" name="mashPower" value="5" min="1" max="20" step="1">
+            
+            <div class="form-group">
+                <label><i class="fas fa-skull"></i> 抵抗 (Decay)</label>
+                <div class="form-fields">
+                    <input type="number" name="mashDecay" value="30" min="5" max="100">
+                </div>
+                <p class="notes">每秒自动扣除量</p>
             </div>
-            <p class="notes" style="flex: 100%; margin:0;">每次按键增加的进度值 (1-20)。</p>
         </div>
+        
+        <!-- 第二行：限时 -->
         <div class="form-group">
             <label><i class="fas fa-hourglass-half"></i> 限时 (Seconds)</label>
             <div class="form-fields">
-                <input type="number" name="mashDuration" value="10" min="3" max="30">
+                <input type="number" name="mashDuration" value="10" min="3" max="60">
             </div>
-            <p class="notes" style="flex: 100%; margin:0;">如果在限时内未填满或归零，判负。</p>
         </div>
+        
+        <p class="notes" style="margin-top:-5px; margin-bottom: 10px;">力度 > 抵抗/点击频率 才能获胜。</p>
     </div>
 
     <!-- 区域 B: 序列模式参数 -->
