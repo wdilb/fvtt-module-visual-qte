@@ -5,7 +5,7 @@
  *           包含 [精准点击] 和 [疯狂连打] 两种模式
  *           支持音效、动画反馈、自定义难度及战报统计
  * 作者: Tiwelee (Refactored)
- * 版本: 1.0
+ * 版本: 1.2.0
  * ============================================================================
  */
 
@@ -423,6 +423,9 @@ class QTEOverlay {
     /** @static @type {string} QTE 事件标题，用于战报显示 */
     static title = ""; 
 
+    /** @static @type {Function} 绑定的按键处理函数引用 */
+    static boundHandleKey = null;
+
     // ====================== 序列模式专用变量 =======================
     
     /** @static @type {Array} 按键序列数据 */
@@ -459,9 +462,6 @@ class QTEOverlay {
     
     /** @static @type {number} 连打结束时间戳 */
     static mashEndTime = 0;
-
-    /** @static @type {Function} 绑定的按键处理函数引用 */
-    static boundHandleKey = null;
 
     // ======================= 核心入口方法 =======================
 
