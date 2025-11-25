@@ -3,7 +3,7 @@
   "title": "QTE",
   "version": "1.2.0",
   "compatibility": {
-    "minimum": "12",
+    "minimum": "13",
     "verified": "13"
   },
   "socket": true,
